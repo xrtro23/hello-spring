@@ -3,11 +3,1330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello Spring</title>
+    <title>NORANI | 보드게임 플레이 아카이브</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-2: #0b1120;
+            --border: #334155;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #38bdf8;
+            --emerald: #10b981;
+            --amber: #f59e0b;
+            --rose: #f43f5e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 28px 16px 60px;
+        }
+        .container { max-width: 1120px; margin: 0 auto; }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .brand h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+        .brand p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+        .header-actions { display: flex; gap: 10px; align-items: center; }
+        .domain-pill {
+            background: rgba(56, 189, 248, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .btn-add {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-add:hover { background: var(--primary-hover); }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .kpi {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+        }
+        .kpi-label { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+        .kpi-val { font-size: 24px; font-weight: 800; margin-top: 6px; color: var(--text); }
+        .kpi-sub { font-size: 12px; color: var(--accent); margin-top: 4px; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            overflow-x: auto;
+        }
+        .tab-btn {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid transparent;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .tab-btn.active {
+            background: var(--surface);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        /* Panels */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* Rulemaster Grid */
+        .rm-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        .rm-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .rm-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        .rm-title { font-size: 16px; font-weight: 700; }
+        .rm-total {
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .rm-bars { display: flex; flex-direction: column; gap: 8px; }
+        .rm-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+        .rm-name { width: 70px; color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .rm-bar-wrap { flex: 1; background: var(--surface-2); height: 8px; border-radius: 4px; overflow: hidden; }
+        .rm-bar { height: 100%; background: var(--primary); border-radius: 4px; }
+        .rm-cnt { width: 32px; text-align: right; color: var(--muted); font-weight: 600; }
+
+        /* Filter & Search Bar */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .group-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+        .chip {
+            background: var(--surface);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .chip.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+            font-weight: 600;
+        }
+        .search-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 260px;
+            outline: none;
+        }
+        .search-box:focus { border-color: var(--accent); }
+
+        /* Session Cards */
+        .session-list { display: flex; flex-direction: column; gap: 12px; }
+        .session-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            transition: border-color 0.2s;
+        }
+        .session-card:hover { border-color: #475569; }
+        .s-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .s-date { font-size: 15px; font-weight: 700; color: var(--accent); }
+        .s-group {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 6px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--emerald);
+        }
+        .s-note {
+            font-size: 12px;
+            color: var(--amber);
+            background: rgba(245, 158, 11, 0.12);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+        .s-row { display: flex; gap: 8px; margin-top: 8px; align-items: flex-start; font-size: 14px; }
+        .s-label { color: var(--muted); min-width: 48px; font-weight: 600; font-size: 13px; padding-top: 2px; }
+        .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tag-member {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: #cbd5e1;
+            padding: 2px 9px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        .tag-game {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: #c7d2fe;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Rank Table */
+        .rank-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .rank-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .rank-card h3 { font-size: 16px; margin-bottom: 14px; }
+        .rank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+            font-size: 14px;
+        }
+        .rank-item:last-child { border-bottom: none; }
+        .rank-num {
+            display: inline-block;
+            width: 24px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .rank-badge {
+            background: var(--surface-2);
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        /* Modal */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 50;
+        }
+        .modal-backdrop.open { display: flex; }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            width: 100%;
+            max-width: 560px;
+            padding: 24px;
+        }
+        .modal h2 { font-size: 18px; margin-bottom: 12px; }
+        .modal p { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+        .modal select, .modal textarea {
+            width: 100%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+        .modal textarea { height: 150px; resize: vertical; }
+        .modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .rank-grid { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
-<h1>Hello, Spring!</h1>
-<p>나만의 서버에 오신 것을 환영합니다.</p>
-<p>Spring Boot + Java 21</p>
+<div class="container">
+    <header>
+        <div class="brand">
+            <h1>🎲 보드게임 모임 & 룰마 아카이브</h1>
+            <p>모임별 룰마스터 통계 · 플레이 히스토리 · 게임/멤버 랭킹</p>
+        </div>
+        <div class="header-actions">
+            <span class="domain-pill">norani.duckdns.org</span>
+            <button class="btn-add" onclick="openModal()">+ 기록 추가 (붙여넣기)</button>
+        </div>
+    </header>
+
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="kpi-label">룰마 요약 총합</div>
+            <div class="kpi-val" id="kpiRulemaster">160회</div>
+            <div class="kpi-sub">8개 모임 그룹 집계</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">상세 기록 세션</div>
+            <div class="kpi-val" id="kpiSessions">0회</div>
+            <div class="kpi-sub">날짜별 상세 로그</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">누적 플레이 게임</div>
+            <div class="kpi-val" id="kpiGames">0종</div>
+            <div class="kpi-sub" id="kpiTotalPlays">총 0판 플레이</div>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">함께한 멤버</div>
+            <div class="kpi-val" id="kpiMembers">0명</div>
+            <div class="kpi-sub">최다 출석: 시루떡</div>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('sessions', this)">📅 상세 플레이 기록</button>
+        <button class="tab-btn" onclick="switchTab('rulemaster', this)">👑 룰마스터 요약</button>
+        <button class="tab-btn" onclick="switchTab('rankings', this)">📊 게임 & 멤버 랭킹</button>
+    </div>
+
+    <!-- Tab 1: 상세 플레이 기록 -->
+    <div id="panel-sessions" class="panel active">
+        <div class="controls">
+            <div class="group-filters" id="groupFilters"></div>
+            <input type="text" class="search-box" id="searchInput" placeholder="날짜, 멤버, 게임명 검색..." oninput="renderSessions()">
+        </div>
+        <div class="session-list" id="sessionList"></div>
+    </div>
+
+    <!-- Tab 2: 룰마스터 요약 -->
+    <div id="panel-rulemaster" class="panel">
+        <div class="rm-grid" id="rulemasterGrid"></div>
+    </div>
+
+    <!-- Tab 3: 게임 & 멤버 랭킹 -->
+    <div id="panel-rankings" class="panel">
+        <div class="rank-grid">
+            <div class="rank-card">
+                <h3>🏆 최다 플레이 게임 TOP 25</h3>
+                <div id="gameRankList"></div>
+            </div>
+            <div class="rank-card">
+                <h3>👥 최다 참여 멤버 TOP 25</h3>
+                <div id="memberRankList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 기록 추가 모달 -->
+<div class="modal-backdrop" id="addModal">
+    <div class="modal">
+        <h2>새 모임 기록 붙여넣기</h2>
+        <p>카톡/노트에 적던 양식(⊙ 날짜 / ▶멤버 / ▶게임) 그대로 붙여넣으면 자동 파싱되어 추가됩니다.</p>
+        <select id="modalGroup">
+            <option value="당근모임(독산)">당근모임(독산)</option>
+            <option value="아레나">아레나</option>
+            <option value="플레이메이트(금천구)">플레이메이트(금천구)</option>
+            <option value="카톡모임(금천구)">카톡모임(금천구)</option>
+            <option value="당근모임(봉천)">당근모임(봉천)</option>
+            <option value="보드게임 & 티츄 모임">보드게임 & 티츄 모임</option>
+            <option value="카톡모임(여보게)">카톡모임(여보게)</option>
+            <option value="카톡모임(안지윤)">카톡모임(안지윤)</option>
+        </select>
+        <textarea id="modalText" placeholder="⊙ 26.11.25 (수)
+▶멤버 - 빵찌/시루떡/루미폐인
+▶게임 - 아크노바, 스플렌더"></textarea>
+        <div class="modal-btns">
+            <button class="btn-cancel" onclick="closeModal()">취소</button>
+            <button class="btn-add" onclick="importText()">파싱 후 저장</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const rulemasterSummary = [
+        { group: "당근", total: 117, masters: [["빵찌",48],["루미",28],["스넾",19],["달빛",6],["뀨뀨",3],["AmSae",3],["이스",3],["지인",2],["시루떡",2],["radin",1],["주엽",1],["코모도",1]] },
+        { group: "금천구", total: 13, masters: [["피망",6],["린",5],["별이",1],["코모도",1]] },
+        { group: "임시(안지윤)", total: 11, masters: [["안지윤",11]] },
+        { group: "아레나", total: 11, masters: [["스넾",7],["루미",3],["달빛",1]] },
+        { group: "봉천", total: 3, masters: [["모임장",3]] },
+        { group: "여보게", total: 2, masters: [["채라임",1],["이지",1]] },
+        { group: "플레이메이트", total: 2, masters: [["이스",2]] },
+        { group: "티츄모임", total: 1, masters: [["뀨뀨",1]] }
+    ];
+
+    const rawArchiveText = `
+# 상세 - 당근모임(독산)
+⊙ 25.10.16 (목)
+▶멤버 - 스넾/시루떡/아인/타코야끼
+▶게임 - 스컬퀸, 미드가르드의 챔피언
+
+⊙ 25.10.22 (수)
+▶멤버 - 스넾/시루떡/빵찌/AmSae
+▶게임 - 잉크, 프로마쥬, 봄버스터즈
+
+⊙ 25.10.24 (금)
+▶멤버 - 스넾/시루떡/굿모닝/빵찌(◐)
+▶게임 - 퍼레이드, 다섯부족
+
+⊙ 25.10.28 (화)
+▶멤버 - 스넾/시루떡(◐)/AmSae/정훈
+▶게임 - 퍼레이드, 슈뢰딩거의 고양이, 갬블러갬블, 해외판(?)
+
+⊙ 25.10.31 (금)
+▶멤버 - 스넾/시루떡/정훈/브로
+▶게임 - 파운데이션 메트로폴리스, 스페이스크루, 참새작
+
+⊙ 25.11.11 (화)
+▶멤버 - 루미폐인/시루떡/뀨뀨
+▶게임 - 라이프 오브 아마조니아
+
+⊙ 25.11.14 (금)
+▶멤버 - 뀨뀨/루미폐인/시루떡/지현(페페)/우섭/굿모닝/빵찌
+▶게임 - 픽토매니아, 코드네임, 젝스님트, 달무티, 스트림스, 월링 위치크래프트
+
+⊙ 25.11.20 (목)
+▶멤버 - radin/시루떡/민이/씨그린
+▶게임 - 킵 더 히어로즈 아웃!
+
+⊙ 25.11.25 (화)
+▶멤버 - 스넾/시루떡/루미폐인/빵찌(▲)
+▶게임 - 문명의 시대, 하모니즈
+
+⊙ 25.11.27 (목)
+▶멤버 - 빵찌/시루떡
+▶게임 - 비뉴스, 윙스팬
+
+⊙ 25.12.02 (화)
+▶멤버 - 빵찌/시루떡/AmSae
+▶게임 - 비뉴스
+
+⊙ 25.12.03 (수)
+▶멤버 - 스넾/시루떡/빵찌
+▶게임 - 멘네페르
+
+⊙ 25.12.16 (화)
+▶멤버 - 빵찌/시루떡/AmSae/쥬랑(이유)
+▶게임 - 섀클턴베이스
+
+⊙ 25.12.23 (화)
+▶멤버 - 빵찌/시루떡/쥬랑(이유)
+▶게임 - 피닉스 뉴 호라이즌
+
+⊙ 25.12.29 (월)
+▶멤버 - 스넾/시루떡
+▶게임 - 마라케시 (스테판 펠트)
+
+⊙ 26.01.05 (월)
+▶멤버 - 빵찌/시루떡/바니바니
+▶게임 - 섀클턴베이스, 라타
+
+⊙ 26.01.09 (금)
+▶멤버 - 스넾/시루떡/바니바니
+▶게임 - 크베들린부르크의 돌팔이 약장수, 캔트스탑, 스타트업스
+
+⊙ 26.01.19 (월)
+▶멤버 - 스넾/시루떡/굿모닝/달빛에취해(◐)
+▶게임 - 파이윰, 크베들린부르크의 돌팔이 약장수
+
+⊙ 26.01.30 (금)
+▶멤버 - 달빛에취해/시루떡/빵찌/게토레이
+▶게임 - 세버튼, 미스트본
+
+⊙ 26.02.02 (월)
+▶멤버 - 빵찌/시루떡/벼무/바니바니
+▶게임 - 테라포밍마스
+
+⊙ 26.02.06 (금)
+▶멤버 - 빵찌/시루떡/달빛에취해/정훈
+▶게임 - 테라포밍마스, 루우트, 오딘
+
+⊙ 26.02.11 (수)
+▶멤버 - 빵찌/시루떡/달빛에취해/뀨뀨
+▶게임 - 테라포밍마스
+
+⊙ 26.02.12 (목)
+▶멤버 - 스넾/시루떡/달빛에취해/개띠아빠
+▶게임 - 나르, 프리세이지, 광란의 푸드트럭
+
+⊙ 26.02.15 (일)
+▶멤버 - 루미폐인/시루떡
+▶게임 - 패치워크, 코드네임 듀엣, 아그리콜라 크고 작은 생물들, 반지의 제왕 Confrontation, 아산테, 타르기
+
+⊙ 26.02.19 (목)
+▶멤버 - 빵찌/시루떡/달빛에취해/정훈
+▶게임 - 테라포밍마스
+
+⊙ 26.02.23 (월)
+▶멤버 - 빵찌/시루떡/굿모닝
+▶게임 - 테라포밍마스
+
+⊙ 26.02.25 (수)
+▶멤버 - 빵찌/시루떡/하나비(하드보드)/뀨뀨
+▶게임 - 테라포밍마스
+
+⊙ 26.02.25 (수)
+▶멤버 - 뀨뀨/시루떡
+▶게임 - 스트라테고
+
+⊙ 26.03.04 (수)
+▶멤버 - 빵찌/시루떡
+▶게임 - 엘더베일의 거처
+
+⊙ 26.03.05 (목)
+▶멤버 - 빵찌/시루떡
+▶게임 - 스피크이지
+
+⊙ 26.03.06 (금)
+▶멤버 - 스넾/시루떡/빵찌/놀고
+▶게임 - 업세션
+
+⊙ 26.03.10 (화)
+▶멤버 - 빵찌/시루떡/하나비(하드보드)/AmSae
+▶게임 - 루티어
+
+⊙ 26.03.11 (수)
+▶멤버 - 지인/시루떡/스넾/빵찌
+▶게임 - 에이언즈 엔드
+
+⊙ 26.03.13 (금)
+▶멤버 - 뀨뀨/시루떡/이스/김도윤
+▶게임 - 렉시오, 꼬꼬미노, 보츠와나, 파머스마켓, 스카우트
+
+⊙ 26.03.16 (수)
+▶멤버 - 빵찌/시루떡/하나비(하드보드)/마루
+▶게임 - 루티어
+
+⊙ 26.03.20 (금)
+▶멤버 - 빵찌/시루떡/개띠아빠
+▶게임 - 아크노바, 아크 노바 확장: 마린 월드
+
+⊙ 26.03.30 (월)
+▶멤버 - 빵찌/시루떡/마루
+▶게임 - 아나크로니
+
+⊙ 26.04.01 (수)
+▶멤버 - 빵찌/시루떡/마루
+▶게임 - 아나크로니
+
+⊙ 26.04.10 (금)
+▶멤버 - 루미폐인/시루떡/이스/바니바니
+▶게임 - 플로렌스(피렌체의 제후), 오버파킹
+
+⊙ 26.04.15 (수)
+▶멤버 - 빵찌/시루떡/주엽
+▶게임 - 니폰: 자이바츠
+
+⊙ 26.04.16 (목)
+▶멤버 - 빵찌/시루떡/하나비(하드보드)/민이
+▶게임 - 오스티아
+
+⊙ 26.04.18 (토)
+▶멤버 - 루미폐인/시루떡/달빛에취해/수르
+▶게임 - AI 100% 휴먼, 야단법석 달리기, 크립티드, 봄버스터즈
+
+⊙ 26.04.22 (수)
+▶멤버 - 달빛에취해/시루떡/지인/주엽
+▶게임 - 킵 더 히어로즈 아웃!, 프리세이지
+
+⊙ 26.04.23 (목)
+▶멤버 - 빵찌/시루떡/굿모닝
+▶게임 - 온 마스
+
+⊙ 26.04.24 (금)
+▶멤버 - 루미폐인/시루떡(◐)/달빛에취해(◐)/빵찌(▲)/이스(▲)
+▶게임 - 아그리콜라, 파러웨이
+
+⊙ 26.04.24 (금)
+▶멤버 - 주엽/시루떡/페페/바니바니
+▶게임 - 컬러풀 세렝게티, 오이 다섯 개, 우봉고: 3D, 타코 캣 고트 치즈 피자, 닥터 유레카, 동화책과 게임: 토끼와 거북이, 크베들린부르크의 돌팔이 약장수, 뒤죽박죽 서커스 (산리오 ver.)
+
+⊙ 26.04.25 (토)
+▶멤버 - 루미폐인/시루떡/달빛에취해/이스
+▶게임 - 봄버스터즈, 크로놀로직: 파리 1920, 5분 던전, 공룡섬, 지도 제작자들
+
+⊙ 26.04.28 (화)
+▶멤버 - 빵찌/시루떡/su15926
+▶게임 - 웨더 머신
+
+⊙ 26.04.29 (수)
+▶멤버 - 빵찌/시루떡/하나비(하드보드)/마루
+▶게임 - 페야의 늪
+
+⊙ 26.05.01 (금)
+▶멤버 - 루미폐인/시루떡(◑)/구구/시골쥐(◐)
+▶게임 - 크립티드, 캔트스탑, 사건의 재구성, 슈퍼 라이노, 파러웨이, 패치워크
+
+⊙ 26.05.03 (일)
+▶멤버 - 빵찌/구름산호랑이/시루떡(◐)/루미폐인/달빛에취해/예콩콩/우엉/radin(◐)
+▶게임 - 미션: 모자이크, 저스트 원, 너도? 나도! 파티, 달무티, 코드네임
+
+⊙ 26.05.09 (토)
+▶멤버 - 루미폐인/시루떡(◑)/이스/김진우
+▶게임 - 칠교신도시, 라타
+
+⊙ 26.05.12 (화)
+▶멤버 - 빵찌/시루떡/우엉
+▶게임 - 아크노바
+
+⊙ 26.05.13 (수)
+▶멤버 - 빵찌/시루떡/하나비(하드보드)/su15926
+▶게임 - 니폰: 자이바츠
+
+⊙ 26.05.14 (목)
+▶멤버 - 빵찌/시루떡/하나비(하드보드)
+▶게임 - 스피크이지
+
+⊙ 26.05.18 (월)
+▶멤버 - 빵찌/시루떡/하나비(하드보드)/게스트(하드보드)
+▶게임 - 오스티아
+
+⊙ 26.05.24 (일)
+<반지 원정대:DOKSANDONG>
+▶멤버 - 루미폐인/시루떡/달빛에취해/정훈
+▶게임 - 반지의 제왕: 가운데땅 여정
+
+⊙ 26.05.29 (금)
+▶멤버 - 스넾/시루떡/달빛에취해
+▶게임 - 세 자매, 포레스트 셔플, 판타스틱 팩토리
+
+⊙ 26.06.02 (화)
+▶멤버 - 빵찌/시루떡/페페
+▶게임 - 아크노바
+
+⊙ 26.06.03 (수)
+▶멤버 - 빵찌/시루떡/su15926
+▶게임 - 스피크이지
+
+⊙ 26.06.07 (일)
+<반지 원정대:DOKSANDONG>
+▶멤버 - 루미폐인/시루떡/달빛에취해/정훈
+▶게임 - 반지의 제왕: 가운데땅 여정
+- 2회차 (당근 진행 x, 카톡방)
+
+⊙ 26.06.09 (화)
+▶멤버 - 빵찌/시루떡/페페/su15926
+▶게임 - 썬더 로드: 벤데타, 썬더 로드: 벤데타 - 혼돈의 축제
+
+⊙ 26.06.12 (금)
+▶멤버 - 루미폐인/시루떡/달빛에취해/예콩콩/래빗(▲)
+▶게임 - 스마트10, 알함브라
+
+⊙ 26.06.13 (토)
+▶멤버 - 루미폐인/시루떡/우엉/홍잼(홍재민)
+▶게임 - 카페 엑스프레소, 오버파킹, 우봉고: 3D, 폴드-잇, 라타, 하모니즈
+
+⊙ 26.06.16 (화)
+▶멤버 - 빵찌/시루떡/페페
+▶게임 - 아크노바
+
+⊙ 26.06.19 (금)
+▶멤버 - 루미폐인/시루떡/개띠아빠
+▶게임 - 아그리콜라, 하모니즈, 칠교신도시
+
+⊙ 26.06.20 (토)
+▶멤버 - 루미폐인/시루떡(◐)/정훈/뀨꿋/보겜뉴비(▲)
+▶게임 - 파워그리드, 라그랑하
+
+⊙ 26.06.23 (화)
+▶멤버 - 빵찌/시루떡/이스
+▶게임 - 리스보아
+
+⊙ 26.06.27 (토)
+▶멤버 - 루미폐인/시루떡/달빛에취해
+▶게임 - 노스 아메리칸 레일웨이즈, 고빅, 태플, 우봉고 포켓몬
+- FAIR PLAYTE
+
+⊙ 26.06.28 (일)
+<반지 원정대:DOKSANDONG>
+▶멤버 - 루미폐인/시루떡/달빛에취해/정훈
+▶게임 - 반지의 제왕: 가운데땅 여정, 오딘을 위하여
+- 3회차 (당근 진행 x, 카톡방)
+
+⊙ 26.06.30 (화)
+▶멤버 - 빵찌/시루떡/페페
+▶게임 - 비뉴스
+
+⊙ 26.07.01 (수)
+▶멤버 - 루미폐인/시루떡/빵찌/이스
+▶게임 - 이스탄불, 리틀 타운, 갱스터
+
+⊙ 26.07.06 (월)
+▶멤버 - 빵찌/시루떡/달빛에취해/로한
+▶게임 - 오를레앙(흑사병)
+
+⊙ 26.07.09 (목)
+▶멤버 - 스넾/시루떡/AmSae/싼티
+▶게임 - 야단법석 달리기, 제니스, 핵클래드
+
+⊙ 26.07.14 (화)
+▶멤버 - 빵찌/시루떡/페페
+▶게임 - 아크노바
+
+⊙ 26.07.16 (목)
+▶멤버 - 루미폐인/시루떡/달빛에취해/나물/하허어유어
+▶게임 - 해녀, 코요테, 포켓몬 칩스, 두 도시 사이에서, 다다다, 라온 한줄
+
+⊙ 26.07.21 (화)
+▶멤버 - 스넾/시루떡/AmSae/기린
+▶게임 - 테이크 타임, 이세계에서 경매합니다!
+
+⊙ 26.07.25 (토)
+▶멤버 - 루미폐인/시루떡/달빛에취해/우엉
+▶게임 - 테이크 타임, 겟패킹, 시티즈, 공룡섬 (+확장모듈:청사진), 제니스
+
+⊙ 26.07.26 (일)
+<반지 원정대:DOKSANDONG>
+▶멤버 - 루미폐인/시루떡/달빛에취해/정훈
+▶게임 - 반지의 제왕: 가운데땅 여정, 오딘을 위하여
+- 4회차 (당근 진행 x, 카톡방)
+
+⊙ 26.07.30 (목)
+▶멤버 - 달빛에취해/시루떡/코모도/귤귤
+▶게임 - 플립툰즈, 냠냠냠, 커피러시
+
+⊙ 26.08.02 (일)
+▶멤버 - 루미폐인/시루떡/정훈/인천
+▶게임 - 냠냠냠, 파러웨이, 촵촵다이스, 라그랑하, 하모니즈
+
+⊙ 26.08.07 (금)
+▶멤버 - 빵찌/시루떡/달빛에취해/굿모닝
+▶게임 - 앤트
+
+⊙ 26.08.17 (월)
+▶멤버 - 루미폐인/시루떡/정훈/송이(정과장)
+▶게임 - 파머스마켓, 코드네임, 이스탄불: 주사위 게임, 석기시대, 테이크 잇 이지, 칠교신도시, 캔트스탑, 킹도미노
+
+⊙ 26.08.19 (수)
+▶멤버 - 스넾/시루떡/미안해요/radin(◐)
+▶게임 - 스컬, 이레이저, 스페이스 크루
+
+⊙ 26.08.25 (화)
+▶멤버 - 루미폐인/시루떡/달빛에취해/빵찌/페페
+▶게임 - 세버튼, 파워 그리드
+
+⊙ 26.08.25 (화)
+▶멤버 - 빵찌/시루떡/페페
+▶게임 - 아크노바
+
+⊙ 26.08.26 (수)
+▶멤버 - 빵찌/시루떡/굿모닝
+▶게임 - 리콜
+
+⊙ 26.08.29 (토)
+▶멤버 - 달빛에취해/시루떡/우엉/su15926
+▶게임 - 네메시스: 락다운, 익스플로딩 키튼, 문 콜로니 블러드배스
+
+⊙ 26.09.01 (화)
+▶멤버 - 빵찌/시루떡/페페
+▶게임 - 아크노바
+
+⊙ 26.09.05 (토)
+▶멤버 - 스넾/시루떡/미안해요/radin(◐)
+▶게임 - 잊혀진 대륙의 철도들, 테이크 타임
+
+⊙ 26.09.08 (화)
+▶멤버 - 빵찌/시루떡/페페
+▶게임 - 아크노바
+
+⊙ 26.09.12 (토)
+▶멤버 - 달빛에취해/시루떡/주엽/스넾(△)
+▶게임 - 크툴루: 죽음마저 죽으리니, 하트 오브 크라운
+
+⊙ 26.09.14 (월)
+▶멤버 - 빵찌/시루떡/인천
+▶게임 - 스피크이지
+
+⊙ 26.09.15 (화)
+▶멤버 - 빵찌/시루떡/AmSae/페페
+▶게임 - 섀클턴 베이스, 섀클턴 베이스 확장 : 언더문ㆍ루나ㆍ제니스
+
+⊙ 26.09.18 (금)
+▶멤버 - 이스/시루떡/길성
+▶게임 - 윙스팬, 이스탄불: 주사위 게임
+
+⊙ 26.09.19 (토)
+▶멤버 - 루미폐인/시루떡/연그린/마늘크림치즈
+▶게임 - 블랙 포레스트, 파러웨이, 자반도르의 셉터
+
+⊙ 26.09.22 (화)
+▶멤버 - 루미폐인/시루떡/정훈/개띠아빠
+▶게임 - 플립툰즈, 생츄어리: 아크노바 게임, 갱스터
+
+⊙ 26.09.23 (수)
+▶멤버 - 루미폐인/시루떡(◑)/정훈/페페
+▶게임 - 하모니즈, 블랙 포레스트, 오버파킹, 패치워크
+
+⊙ 26.09.23 (수)
+▶멤버 - 코모도/시루떡/완낭
+▶게임 - 킹 오브 도쿄, 딥 씨 크루, 스컬, 킹도미노
+
+⊙ 26.09.29 (화)
+▶멤버 - 빵찌/시루떡/굿모닝/su15926
+▶게임 - 레일웨이 붐
+
+⊙ 26.10.02 (금)
+▶멤버 - 빵찌/시루떡/이스/정훈
+▶게임 - 온마스
+
+⊙ 26.10.03 (토)
+▶멤버 - 루미폐인/시루떡/페페/송이(정과장)
+▶게임 - 젬블로Q, 라 보카, 시티즈, 슬라이드 퀘스트, 기린기린, 크립티드, 하모니즈, 코드네임, 사건의 재구성
+
+⊙ 26.10.04 (일)
+▶멤버 - 스넾/시루떡(◐)/AmSae/완낭/개띠아빠(▲)
+▶게임 - 섀클턴 베이스
+
+⊙ 26.10.07 (수)
+▶멤버 - 달빛에취해/시루떡(◑)/길성/홍삼
+▶게임 - 지소기: 애니메이션 스튜디오 타이쿤, 태그 팀, 태그 팀:아서왕전설
+
+⊙ 26.10.08 (목)
+▶멤버 - 스넾/시루떡/AmSae/페페
+▶게임 - 트래지디 루퍼
+
+⊙ 26.10.10 (토)
+▶멤버 - 이스(◐)/시루떡/루미폐인/달빛에취해/우엉/지인/카백/개띠아빠(◑)/정훈(◑)
+▶게임 - 너도? 나도! 파티, 저스트 원, 젝스님트, 디셉션: 홍콩 살인사건, 달무티, 코드네임
+
+⊙ 26.10.10 (토)
+▶멤버 - 루미폐인/시루떡/정훈/달빛에취해/우엉(▲)
+▶게임 - 푸에르토리코, 파머스 마켓, 냠냠냠
+
+⊙ 26.10.11 (일)
+▶멤버 - 지인/시루떡/AmSae/카백
+▶게임 - 푸에르토리코 1897: 스페셜 에디션, 트리케타, 트리케타: 히든 울브즈
+
+⊙ 26.10.15 (목)
+▶멤버 - 이스/시루떡/길성
+▶게임 - 할리갈리 컵스, 윙스팬, 우봉고
+
+⊙ 26.10.16 (금)
+▶멤버 - 빵찌/시루떡/달빛에취해/정훈
+▶게임 - 웨더머신
+
+⊙ 26.10.18 (일)
+▶멤버 - 시루떡/AmSae/이스/radin
+▶게임 - 올드 킹스 크라운
+
+⊙ 26.10.18 (일)
+▶멤버 - AmSae/시루떡/카백
+▶게임 - 우리사이 냥이, 리버스, 지소기: 애니메이션 스튜디오 타이쿤, 와리가리 레이스
+
+⊙ 26.10.22 (목)
+▶멤버 - 빵찌/시루떡/달빛에취해/오이
+▶게임 - 태양신 라 아크릴 에디션, 태양신 라: 트레이더스, 레지사이드 레거시
+
+⊙ 26.10.23 (금)
+▶멤버 - 빵찌/시루떡/이스/굿모닝
+▶게임 - 리스보아
+
+⊙ 26.10.24 (토)
+▶멤버 - AmSae/시루떡/굿모닝/완낭
+▶게임 - 레버넌트, 이더리움(에테리움), 저스트 칠린
+
+⊙ 26.10.25 (일)
+▶멤버 - 시루떡/이스/완낭/오이
+▶게임 - 마스크맨, 언락! 1, 17 다이스 벳, 꼬꼬미노
+
+⊙ 26.10.27 (화)
+▶멤버 - AmSae/시루떡/su15926/지인(▲)
+▶게임 - 아크스
+
+# 아레나
+⊙ 26.03.14 (토)
+▶멤버 - 스넾/시루떡/달빛에취해/지인
+▶게임 - 딥 씨 크루
+
+⊙ 26.03.25 (수)
+▶멤버 - 루미폐인/시루떡/지인
+▶게임 - 센추리: 향신료의 길, 카르누타
+
+⊙ 26.04.09 (목)
+▶멤버 - 스넾/시루떡/루미폐인/AmSae/지인
+▶게임 - 갱스터
+
+⊙ 26.04.13 (월)
+▶멤버 - 스넾/시루떡/루미폐인/달빛에취해/지인(◐)
+▶게임 - 냠냠냠, 카르누타, 딥 씨 크루
+
+⊙ 26.04.14 (화)
+▶멤버 - 스넾/시루떡/달빛에취해
+▶게임 - 버건디의 성, 7 원더스: 건축가들
+
+⊙ 26.04.16 (목)
+▶멤버 - 스넾(▲)/시루떡/루미폐인/달빛에취해(▲)/지인
+▶게임 - 냠냠냠, 카르누타, 딥 씨 크루
+
+⊙ 26.04.20 (월)
+▶멤버 - 스넾/시루떡
+▶게임 - 버건디의 성, 해적들의 약탈
+- BGA 별도 진행
+
+⊙ 26.05.11 (월)
+▶멤버 - 스넾/시루떡/루미폐인/달빛에취해
+▶게임 - 플립툰즈, 냠냠냠, 딥 씨 크루
+
+⊙ 26.06.11 (목)
+▶멤버 - 루미폐인/시루떡/달빛에취해/냠냠
+▶게임 - 냠냠냠, 플립툰즈, 석기시대
+
+⊙ 26.07.23 (목)
+▶멤버 - 루미폐인/시루떡/달빛에취해
+▶게임 - 플립툰즈: 시즌2, 기즈모, 팬데믹
+
+⊙ 26.08.03 (월)
+▶멤버 - 달빛에취해/시루떡/빵찌/스넾/이스/개띠아빠/바버(misstoo)/냠냠/마루/su15926
+▶게임 - 태그팀 토너먼트
+
+# 상세 - 플레이메이트(금천구)
+⊙ 26.08.01 (토)
+▶멤버 - 이동엽/최재영/함준형
+▶게임 - 카탄, 야단법석 달리기, 기린기린
+
+⊙ 26.10.29 (목)
+▶멤버 - 이동엽/최재영/강성원/전소현(짜란)/권연진(글씨 성장소)
+▶게임 - 보츠와나, 레지스탕스: 아발론
+
+⊙ 26.11.01 (일)
+▶멤버 - 이동엽/최재영/함준형/강성원/전소현(짜란)/이성준(짜란)/김서로(청춘서재)/김승인(금천구-승인)/박준영(금천구-준영)/김서정(?)/김예조(?)
+▶게임 - 디셉션: 홍콩 살인사건, 사보타지, 젝스님트, 코드네임, 기묘한 이야기: 마인드 플레이어의 습격
+
+⊙ 26.11.14 (토)
+▶멤버 - 이동엽/최재영/전소현(짜란)/이재진(생존수영단)
+▶게임 - 야단법석 달리기, 봄버스터즈, 차가운 그녀가 눈을 뜨기 전에, 센추리: 골렘 에디션
+
+# 상세 - 카톡모임(금천구)
+⊙ 25.12.22 (월)
+▶멤버 - 린/엔쵸/별이/코모도
+▶게임 - 점박이, 딥씨크루, 슈뢰딩거의 고양이
+
+⊙ 25.12.24 (수)
+▶멤버 - 피망/엔쵸/린/엄지척
+▶게임 - 밀레 피오리, 크리스마스의 유령들 (GHOSTS OF CHRISTMAS)
+
+⊙ 26.01.02 (금)
+▶멤버 - 린/엔쵸/피망/별이
+▶게임 - 쿠트나 호라:은의도시
+
+⊙ 26.01.14 (수)
+▶멤버 - 피망/엔쵸/별이
+▶게임 - 그랜드 오스트리아 호텔
+
+⊙ 26.01.15 (목)
+▶멤버 - 피망/엔쵸/별이
+▶게임 - 그랜드 오스트리아 호텔, 웰컴 투
+
+⊙ 26.04.03 (목)
+▶멤버 - 별이/엔쵸/댑싸리/코모도
+▶게임 - 킹 오브 도쿄, 노 땡스, QE(경매게임), 오이 다섯 개
+
+⊙ 26.04.13 (월)
+▶멤버 - 피망/엔쵸/별이/임이
+▶게임 - 리스보아
+
+⊙ 26.05.06 (월)
+▶멤버 - 피망/엔쵸/별이
+▶게임 - 페야의 늪, 상트 페테르부르크 (2판)
+
+⊙ 26.06.22 (월)
+▶멤버 - 피망/엔쵸/별이
+▶게임 - 스피크이지
+
+⊙ 26.07.05 (일)
+▶멤버 - 린/엔쵸/별이/코모도
+▶게임 - 워 체스트, 바르셀로나, 벌레가 싫어
+
+⊙ 26.08.03 (월)
+▶멤버 - 린/엔쵸/별이/엄지척/코모도/자유의방랑자
+▶게임 - 킹덤 크로싱, 보츠와나, 갱스터, 탑텐TV 시트콤
+
+⊙ 26.08.15 (토)
+▶멤버 - 린/엔쵸/준기
+▶게임 - 앤트, 오를로이, 엠블럼 : 가문의 영광을 위하여, 12칩 트릭
+
+⊙ 26.10.14 (수)
+▶멤버 - 코모도/엔쵸/엄지척
+▶게임 - 킬링래빗, 시즌스, 보틀 임프
+
+# 상세 - 당근모임(봉천)
+⊙ 25.11.13 (목)
+▶멤버 - 모임장/시루떡/이글스/우섭/쭈구미/아아
+▶게임 - 오딘, 다 죽었DAY, 트리오, 피치카, 모자가 아니잖아, 카멜레온
+
+⊙ 25.11.19 (수)
+▶멤버 - 모임장/시루떡/가올희/이짱
+▶게임 - 엔데버 심해
+
+⊙ 26.01.12 (수)
+▶멤버 - 모임장/시루떡/프레임/이오/새파란바람/Jun/사보타지하고싶어요
+▶게임 - 크로스 클루, 코드네임, 가지각새, 콘셉트
+
+# 상세 - 보드게임 & 티츄 모임
+⊙ 25.07.19 (일)
+▶멤버 - 뀨뀨/시루떡/보드엠 게스트 2인
+▶게임 - 티츄
+
+# 상세 - 카톡모임(여보게)
+⊙ 26.01.27 (월)
+▶멤버 - 채라임/엔쵸/0
+▶게임 - 원드러스 크리처
+
+⊙ 26.03.24 (월)
+▶멤버 - 이지/현진/엔쵸/0
+▶게임 - 미지의행성
+
+# 상세 - 카톡모임(안지윤)
+⊙ 26.03.19 (목)
+▶멤버 - 안지윤/재영/진수/진우/이미웅
+▶게임 - 반디도, 태양신 라, 메르브: 실크로드의 심장
+
+⊙ 26.03.26 (목)
+▶멤버 - 안지윤/재영/조지조지/노은서
+▶게임 - 트리오비전, 더 마인드, 더 게임, 어나니머스, 루스, 타이니타운
+
+⊙ 26.04.08 (수)
+▶멤버 - 안지윤/재영/진수/강현우/국현우
+▶게임 - 한자 토이토니카, 포트로얄
+
+⊙ 26.05.07 (목)
+▶멤버 - 안지윤/재영/박세훈/intown
+▶게임 - 요코하마, 타운 66
+
+⊙ 26.08.05 (수)
+▶멤버 - 안지윤/재영/김준영/문하은
+▶게임 - 비뉴스
+
+⊙ 26.08.12 (수)
+▶멤버 - 안지윤/재영/박세훈/김준영
+▶게임 - 섀클턴베이스
+
+⊙ 26.08.20 (목)
+▶멤버 - 안지윤/재영/박세훈
+▶게임 - 아크노바
+
+⊙ 26.09.02 (수)
+▶멤버 - 안지윤/재영/intown/장영길
+▶게임 - 밀레 피오리, 크리스마스의 유령들 (GHOSTS OF CHRISTMAS), 라이즈
+
+⊙ 26.09.21 (월)
+▶멤버 - 안지윤/재영/박세훈/성하영
+▶게임 - 리스보아
+
+⊙ 26.10.17 (토)
+▶멤버 - 안지윤/재영/박세훈/성하영/이동주
+▶게임 - 스마트폰 주식회사, 태양신 라, 자금성
+
+⊙ 26.11.11 (수)
+<예정>
+▶멤버 - 안지윤/재영/----미정-----
+▶게임 - 킵 더 히어로즈 아웃!
+`;
+
+    function parseArchive(text, defaultGroup = "당근모임(독산)") {
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        const sessions = [];
+        let currentGroup = defaultGroup;
+        let cur = null;
+
+        for (const line of lines) {
+            if (line.startsWith('#')) {
+                currentGroup = line.replace(/^#\s*(상세\s*-\s*)?/, '').trim();
+            } else if (line.startsWith('⊙')) {
+                if (cur) sessions.push(cur);
+                cur = {
+                    group: currentGroup,
+                    date: line.replace(/^⊙\s*/, '').trim(),
+                    members: [],
+                    games: [],
+                    notes: []
+                };
+            } else if (line.startsWith('▶멤버') && cur) {
+                const raw = line.replace(/^▶멤버\s*-\s*/, '');
+                cur.members = raw.split('/').map(s => s.trim()).filter(Boolean);
+            } else if (line.startsWith('▶게임') && cur) {
+                const raw = line.replace(/^▶게임\s*-\s*/, '');
+                cur.games = raw.split(',').map(s => s.trim()).filter(Boolean);
+            } else if (cur && (line.startsWith('<') || line.startsWith('-'))) {
+                cur.notes.push(line.replace(/^[<-]\s*|>$/g, '').trim());
+            }
+        }
+        if (cur) sessions.push(cur);
+        return sessions;
+    }
+
+    const STORAGE_KEY = 'norani_bg_archive_v1';
+    let allSessions = [];
+    let selectedGroup = '전체';
+
+    function initData() {
+        const base = parseArchive(rawArchiveText);
+        const extra = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        allSessions = [...extra, ...base];
+        // 최신 날짜순 정렬
+        allSessions.sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    function normalizeGameName(name) {
+        return name.replace(/\s+/g, '').toLowerCase();
+    }
+
+    function normalizeMemberName(name) {
+        return name.replace(/\([^)]*\)/g, '').trim();
+    }
+
+    function updateKPIs() {
+        document.getElementById('kpiSessions').textContent = allSessions.length + '회';
+
+        const gameMap = new Map();
+        let totalPlays = 0;
+        const memberSet = new Set();
+
+        allSessions.forEach(s => {
+            s.games.forEach(g => {
+                totalPlays++;
+                const key = normalizeGameName(g);
+                if (!gameMap.has(key)) gameMap.set(key, g);
+            });
+            s.members.forEach(m => {
+                const clean = normalizeMemberName(m);
+                if (clean && !clean.includes('미정') && clean !== '0') memberSet.add(clean);
+            });
+        });
+
+        document.getElementById('kpiGames').textContent = gameMap.size + '종';
+        document.getElementById('kpiTotalPlays').textContent = `총 ${totalPlays}판 플레이`;
+        document.getElementById('kpiMembers').textContent = memberSet.size + '명';
+    }
+
+    function renderGroupFilters() {
+        const groups = ['전체', ...new Set(allSessions.map(s => s.group))];
+        const container = document.getElementById('groupFilters');
+        container.innerHTML = groups.map(g => {
+            const count = g === '전체' ? allSessions.length : allSessions.filter(s => s.group === g).length;
+            return `<button class="chip ${selectedGroup === g ? 'active' : ''}" onclick="selectGroup('${g}')">${g} (${count})</button>`;
+        }).join('');
+    }
+
+    function selectGroup(g) {
+        selectedGroup = g;
+        renderGroupFilters();
+        renderSessions();
+    }
+
+    function renderSessions() {
+        const q = document.getElementById('searchInput').value.trim().toLowerCase();
+        const listEl = document.getElementById('sessionList');
+
+        const filtered = allSessions.filter(s => {
+            if (selectedGroup !== '전체' && s.group !== selectedGroup) return false;
+            if (!q) return true;
+            return s.date.toLowerCase().includes(q) ||
+                s.group.toLowerCase().includes(q) ||
+                s.members.some(m => m.toLowerCase().includes(q)) ||
+                s.games.some(g => g.toLowerCase().includes(q));
+        });
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = `<div style="text-align:center; padding:40px; color:var(--muted);">검색 결과가 없습니다.</div>`;
+            return;
+        }
+
+        listEl.innerHTML = filtered.map(s => `
+        <div class="session-card">
+            <div class="s-top">
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <span class="s-date">⊙ ${s.date}</span>
+                    <span class="s-group">${s.group}</span>
+                    ${s.notes.map(n => `<span class="s-note">${n}</span>`).join('')}
+                </div>
+            </div>
+            <div class="s-row">
+                <span class="s-label">멤버</span>
+                <div class="tag-list">${s.members.map(m => `<span class="tag-member">${m}</span>`).join('')}</div>
+            </div>
+            <div class="s-row">
+                <span class="s-label">게임</span>
+                <div class="tag-list">${s.games.map(g => `<span class="tag-game">${g}</span>`).join('')}</div>
+            </div>
+        </div>
+    `).join('');
+    }
+
+    function renderRulemasters() {
+        const grid = document.getElementById('rulemasterGrid');
+        grid.innerHTML = rulemasterSummary.map(item => `
+        <div class="rm-card">
+            <div class="rm-head">
+                <span class="rm-title">${item.group}</span>
+                <span class="rm-total">총 ${item.total}회</span>
+            </div>
+            <div class="rm-bars">
+                ${item.masters.map(([name, cnt]) => {
+            const pct = Math.max(6, Math.round((cnt / item.total) * 100));
+            return `
+                        <div class="rm-row">
+                            <span class="rm-name">${name}</span>
+                            <div class="rm-bar-wrap"><div class="rm-bar" style="width:${pct}%"></div></div>
+                            <span class="rm-cnt">${cnt}회</span>
+                        </div>
+                    `;
+        }).join('')}
+            </div>
+        </div>
+    `).join('');
+    }
+
+    function renderRankings() {
+        const gameCounts = new Map();
+        const gameLabels = new Map();
+        const memberCounts = new Map();
+
+        allSessions.forEach(s => {
+            s.games.forEach(g => {
+                const key = normalizeGameName(g);
+                gameCounts.set(key, (gameCounts.get(key) || 0) + 1);
+                if (!gameLabels.has(key)) gameLabels.set(key, g);
+            });
+            s.members.forEach(m => {
+                const clean = normalizeMemberName(m);
+                if (clean && !clean.includes('미정') && clean !== '0') {
+                    memberCounts.set(clean, (memberCounts.get(clean) || 0) + 1);
+                }
+            });
+        });
+
+        const topGames = [...gameCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 25);
+        document.getElementById('gameRankList').innerHTML = topGames.map(([key, cnt], idx) => `
+        <div class="rank-item">
+            <div><span class="rank-num">${idx + 1}</span>${gameLabels.get(key)}</div>
+            <span class="rank-badge">${cnt}회</span>
+        </div>
+    `).join('');
+
+        const topMembers = [...memberCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 25);
+        document.getElementById('memberRankList').innerHTML = topMembers.map(([name, cnt], idx) => `
+        <div class="rank-item">
+            <div><span class="rank-num">${idx + 1}</span>${name}</div>
+            <span class="rank-badge">${cnt}회</span>
+        </div>
+    `).join('');
+    }
+
+    function switchTab(tabName, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('panel-' + tabName).classList.add('active');
+    }
+
+    function openModal() { document.getElementById('addModal').classList.add('open'); }
+    function closeModal() { document.getElementById('addModal').classList.remove('open'); }
+
+    function importText() {
+        const group = document.getElementById('modalGroup').value;
+        const text = document.getElementById('modalText').value.trim();
+        if (!text) return;
+
+        const parsed = parseArchive(text, group);
+        if (parsed.length === 0) {
+            alert('⊙ 날짜 형식이 포함된 양식으로 입력해 주세요.');
+            return;
+        }
+
+        const extra = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...parsed, ...extra]));
+
+        document.getElementById('modalText').value = '';
+        closeModal();
+        initData();
+        updateKPIs();
+        renderGroupFilters();
+        renderSessions();
+        renderRankings();
+    }
+
+    initData();
+    updateKPIs();
+    renderGroupFilters();
+    renderSessions();
+    renderRulemasters();
+    renderRankings();
+</script>
 </body>
 </html>
